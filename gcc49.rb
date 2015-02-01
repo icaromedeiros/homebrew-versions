@@ -21,10 +21,11 @@ class Gcc49 < Formula
     `uname -r`.chomp
   end
 
-  homepage 'http://gcc.gnu.org'
-  url "http://ftpmirror.gnu.org/gcc/gcc-4.9.1/gcc-4.9.1.tar.bz2"
-  mirror "ftp://gcc.gnu.org/pub/gcc/releases/gcc-4.9.1/gcc-4.9.1.tar.bz2"
-  sha1 "3f303f403053f0ce79530dae832811ecef91197e"
+  homepage 'https://gcc.gnu.org'
+  url "http://ftpmirror.gnu.org/gcc/gcc-4.9.2/gcc-4.9.2.tar.bz2"
+  mirror "ftp://gcc.gnu.org/pub/gcc/releases/gcc-4.9.2/gcc-4.9.2.tar.bz2"
+  sha1 "79dbcb09f44232822460d80b033c962c0237c6d8"
+  revision 1
 
   head 'svn://gcc.gnu.org/svn/gcc/branches/gcc-4_9-branch'
 
@@ -43,14 +44,10 @@ class Gcc49 < Formula
   depends_on 'isl011'
   depends_on 'ecj' if build.include? 'enable-java' or build.include? 'enable-all-languages'
 
+  fails_with :llvm
+
   # GCC bootstraps itself, so it is OK to have an incompatible C++ stdlib
   cxxstdlib_check :skip
-
-  # Fix 10.10 issues: https://gcc.gnu.org/viewcvs/gcc?view=revision&revision=215251
-  patch do
-    url "https://raw.githubusercontent.com/DomT4/scripts/6c0e48921/Homebrew_Resources/Gcc/gcc1010.diff"
-    sha1 "083ec884399218584aec76ab8f2a0db97c12a3ba"
-  end
 
   def install
     # GCC will suffer build errors if forced to use a particular linker.
@@ -74,6 +71,7 @@ class Gcc49 < Formula
     args = [
       "--build=#{arch}-apple-darwin#{osmajor}",
       "--prefix=#{prefix}",
+      "--libdir=#{lib}/gcc/#{version_suffix}",
       "--enable-languages=#{languages.join(',')}",
       # Make most executables versioned to avoid conflicts.
       "--program-suffix=-#{version_suffix}",
@@ -83,10 +81,6 @@ class Gcc49 < Formula
       "--with-cloog=#{Formula["cloog018"].opt_prefix}",
       "--with-isl=#{Formula["isl011"].opt_prefix}",
       "--with-system-zlib",
-      # This ensures lib, libexec, include are sandboxed so that they
-      # don't wander around telling little children there is no Santa
-      # Claus.
-      "--enable-version-specific-runtime-libs",
       "--enable-libstdcxx-time=yes",
       "--enable-stage1-checking",
       "--enable-checking=release",
@@ -118,6 +112,11 @@ class Gcc49 < Formula
       args << '--enable-multilib'
     end
 
+    # Ensure correct install names when linking against libgcc_s;
+    # see discussion in https://github.com/Homebrew/homebrew/pull/34303
+    inreplace "libgcc/config/t-slibgcc-darwin", "@shlib_slibdir@", "#{HOMEBREW_PREFIX}/lib/gcc/#{version_suffix}"
+
+
     mkdir 'build' do
       unless MacOS::CLT.installed?
         # For Xcode-only systems, we need to tell the sysroot path.
@@ -145,9 +144,6 @@ class Gcc49 < Formula
     # Handle conflicts between GCC formulae.
 
     # Since GCC 4.8 libffi stuff are no longer shipped.
-
-    # Rename libiberty.a.
-    Dir.glob(prefix/"**/libiberty.*") { |file| add_suffix file, version_suffix }
 
     # Rename man7.
     Dir.glob(man7/"*.7") { |file| add_suffix file, version_suffix }

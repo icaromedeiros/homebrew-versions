@@ -2,8 +2,8 @@ require 'formula'
 
 class Ruby20 < Formula
   homepage 'https://www.ruby-lang.org/'
-  url 'http://cache.ruby-lang.org/pub/ruby/2.0/ruby-2.0.0-p576.tar.bz2'
-  sha256 '8cfdbffc81cebd1d25304225ffadc7dcb612a500c81ba6f5f95c5296dfa62059'
+  url 'http://cache.ruby-lang.org/pub/ruby/2.0/ruby-2.0.0-p598.tar.bz2'
+  sha256 '67b2a93690f53e12b635ba1bcdbd41e8c5593f13d575fea92fdd8801ca088f0f'
 
   option :universal
   option 'with-suffix', 'Suffix commands with "20"'
@@ -50,7 +50,9 @@ class Ruby20 < Formula
     system "./configure", *args
     system "make"
     system "make install"
+  end
 
+  def post_install
     (lib/"ruby/#{abi_version}/rubygems/defaults/operating_system.rb").write rubygems_config
   end
 
@@ -64,6 +66,7 @@ class Ruby20 < Formula
         alias :old_default_dir :default_dir
         alias :old_default_path :default_path
         alias :old_default_bindir :default_bindir
+        alias :old_ruby :ruby
       end
 
       def self.default_dir
@@ -113,6 +116,10 @@ class Ruby20 < Formula
 
       def self.default_bindir
         "#{HOMEBREW_PREFIX}/bin"
+      end
+
+      def self.ruby
+        "#{opt_bin}/ruby#{"20" if build.with? "suffix"}"
       end
     end
     EOS
