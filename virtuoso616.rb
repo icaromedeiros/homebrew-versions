@@ -1,7 +1,7 @@
 class Virtuoso616 < Formula
   homepage "http://virtuoso.openlinksw.com/wiki/main/"
   url "https://downloads.sourceforge.net/project/virtuoso/virtuoso/6.1.6/virtuoso-opensource-6.1.6.tar.gz"
-  sha1 "03bc14b1627d16d76687f8b8659801966aab3fb4"
+  sha256 "c6bfa6817b3dad5f87577b68f4cf554d1bfbff48178a734084ac3dcbcea5a037"
 
   head do
     url "https://github.com/openlink/virtuoso-opensource.git", :branch => "develop/6"
